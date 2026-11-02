@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17120f">
+<meta property="og:title" content="Дело № 0711 · Совершенно секретно">
+<meta property="og:description" content="Только для агента Ксюши">
+<meta property="og:type" content="website">
+<style>[hidden]{display:none!important}body{margin:0;font:14px system-ui,sans-serif}</style>
+<title>Операция «Суббота»</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Neucha&family=PT+Mono&family=Rubik+Mono+One&display=swap">
+<style>
+/* Layout: one 9:16 "screen" centered on a dark desk; overlays (folder, scan, dossier) sit on top of the cartoon */
+:root{
+  --desk:#17120f; --kraft:#d6b273; --kraft-dark:#a9854a; --ink:#3a2a1c;
+  --stamp:#c8323a; --term:#06110b; --term-fg:#59f29a; --paper:#f1e8d4;
+  --hand:'Neucha','Comic Sans MS',cursive; --mono:'PT Mono',ui-monospace,monospace; --heavy:'Rubik Mono One','Arial Black',sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--desk);display:flex;align-items:center;justify-content:center;box-sizing:border-box;overflow:hidden;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0;
+  -webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+#stage{position:relative;width:min(100%,calc((100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)) * 9 / 16));
+  aspect-ratio:9/16;max-width:100%;container-type:size;overflow:hidden;border-radius:14px;background:#000}
+#s{position:absolute;inset:0;width:100%;height:100%;display:block}
+.layer{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4cqh;text-align:center}
+.layer[hidden]{display:none!important}
+
+/* cartoon */
+.bob{animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-4px)}}
+.head{transform-box:fill-box;transform-origin:50% 85%;animation:tilt 3.6s ease-in-out infinite}
+@keyframes tilt{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg)}}
+.eye{transform-box:fill-box;transform-origin:center;animation:blink 4s infinite}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+.ear{transform-box:fill-box;transform-origin:50% 100%;animation:ear 3s ease-in-out infinite}
+@keyframes ear{50%{transform:rotate(6deg)}}
+#card,.fan,#zap,#ztip{transform-box:fill-box;transform-origin:center}
+.fan{transform-origin:50% 100%;cursor:pointer}
+.glasses{opacity:0}
+.cardtext{font-family:var(--hand);fill:var(--ink);text-anchor:middle}
+#s:not(.mib) .agent{display:none}
+#s.mib .day{display:none}
+
+/* folder */
+#folder{background:radial-gradient(circle at 50% 40%,#3a2b20,var(--desk));cursor:pointer;perspective:900px}
+.folder{position:relative;width:78cqw;aspect-ratio:4/3;background:var(--kraft);border-radius:2cqw;box-shadow:0 3cqw 6cqw #0008;
+  transform-style:preserve-3d;transition:transform .8s ease-in}
+.folder::before{content:"";position:absolute;left:4cqw;top:-4cqw;width:26cqw;height:5cqw;background:var(--kraft);border-radius:2cqw 2cqw 0 0}
+.cover{position:absolute;inset:0;background:var(--kraft);border-radius:2cqw;transform-origin:left;transition:transform .9s ease-in-out;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6cqw;font-family:var(--mono);color:var(--ink);
+  box-shadow:inset 0 0 0 .5cqw var(--kraft-dark);backface-visibility:hidden}
+.cover small{font-size:3.4cqw;letter-spacing:.1em}
+.cover b{font-size:5cqw}
+.secret{font-family:var(--heavy);color:var(--stamp);border:.8cqw solid var(--stamp);padding:1.5cqw 3cqw;font-size:6.5cqw;transform:rotate(-8deg);opacity:.85}
+#folder.open .cover{transform:rotateY(-170deg)}
+#folder.open .folder{transform:scale(1.6);transition-delay:.5s}
+.hint{font-family:var(--mono);color:var(--kraft);font-size:3.8cqw;letter-spacing:.08em;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+
+/* scan */
+#scan{background:var(--term);color:var(--term-fg);font-family:var(--mono);touch-action:none}
+#scan h2{margin:0;font-size:5cqw;font-weight:400;letter-spacing:.12em;text-wrap:balance;padding:0 6cqw}
+#scan p{margin:0;font-size:3.8cqw;min-height:2.6em;padding:0 8cqw;opacity:.85}
+.fp{width:40cqw;color:var(--term-fg);filter:drop-shadow(0 0 2cqw #59f29a88);cursor:pointer}
+.scanline{opacity:0}
+#scan.holding .scanline{opacity:1;animation:sweep .9s linear infinite alternate}
+@keyframes sweep{to{transform:translateY(146px)}}
+.bar{width:60cqw;height:2.2cqw;border:1px solid var(--term-fg);border-radius:2cqw;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--term-fg)}
+#scan.ok{color:#fff}
+
+/* transitions */
+#flash{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+#flash .rays,#flash .burst{position:absolute;left:var(--fx,50%);top:var(--fy,50%);width:60cqw;height:60cqw;margin:-30cqw 0 0 -30cqw;border-radius:50%;transform:scale(0)}
+#flash .burst{background:radial-gradient(circle,#fff 0 30%,#eaf7ff 50%,#bfe6ff00 70%)}
+#flash .rays{background:repeating-conic-gradient(#fff 0 5deg,#fff0 5deg 15deg);
+  -webkit-mask:radial-gradient(circle,#000 15%,#0000 70%);mask:radial-gradient(circle,#000 15%,#0000 70%)}
+#flash .white{position:absolute;inset:0;background:radial-gradient(circle at var(--fx,50%) var(--fy,50%),#fff 40%,#eef8ff);opacity:0}
+#access{background:#000;color:var(--term-fg);font-family:var(--mono);font-size:6cqw;letter-spacing:.15em}
+
+/* dossier */
+#dossier{background:radial-gradient(circle at 50% 30%,#3a2b20,var(--desk));gap:6cqh;z-index:3}
+.fin{font-family:var(--hand);color:var(--paper);font-size:6.5cqw}
+.sheet{position:relative;width:82cqw;background:var(--paper);color:var(--ink);font-family:var(--mono);text-align:left;
+  padding:6cqw 6cqw 24cqw;box-sizing:border-box;box-shadow:0 3cqw 6cqw #0009;transform:rotate(-1.5deg)}
+.sheet h3{margin:0 0 1cqw;font-family:var(--heavy);font-size:5cqw;font-weight:400;text-wrap:balance}
+.sheet .sub{font-size:3.2cqw;opacity:.65;margin-bottom:4cqw;letter-spacing:.08em}
+.row{display:flex;justify-content:space-between;gap:3cqw;font-size:3.8cqw;padding:2cqw 0;border-bottom:1px dashed #3a2a1c55}
+.row span:last-child{text-align:right}
+#bigstamp{position:absolute;right:6cqw;bottom:5cqw;font-family:var(--heavy);color:var(--stamp);border:1cqw solid var(--stamp);
+  padding:2cqw 3cqw;font-size:6cqw;line-height:1.1;text-align:center;transform:rotate(-10deg) scale(3);opacity:0;pointer-events:none}
+.btn{font-family:var(--mono);font-size:4cqw;background:var(--stamp);color:#fff;border:0;border-radius:1.5cqw;padding:3cqw 6cqw;cursor:pointer;letter-spacing:.06em}
+.btn.ghost{background:transparent;border:1px solid var(--kraft);color:var(--kraft)}
+.link{background:none;border:0;color:var(--kraft);font-family:var(--mono);font-size:3.4cqw;text-decoration:underline;text-underline-offset:3px;cursor:pointer;opacity:.8}
+.moved s{text-decoration-color:var(--stamp);text-decoration-thickness:2px}
+.moved em{font-family:var(--hand);font-style:normal;color:var(--stamp);font-size:1.15em;margin-left:1.5cqw}
+.btn:focus-visible,.link:focus-visible,#mute:focus-visible{outline:2px solid #fff;outline-offset:3px}
+#mute{position:absolute;top:2.5cqw;right:2.5cqw;z-index:5;width:10cqw;height:10cqw;border-radius:50%;border:0;cursor:pointer;
+  background:#0006;color:#fff;font-size:5cqw;line-height:1}
+#mute.off{opacity:.5;text-decoration:line-through}
+
+@media (prefers-reduced-motion:reduce){.bob,.head,.ear,.hint{animation:none}}
+</style>
+
+<div id="stage">
+  <svg id="s" viewBox="0 0 540 960" xmlns="http://www.w3.org/2000/svg"></svg>
+
+  <div id="folder" class="layer" role="button" tabindex="0" aria-label="Открыть секретную папку">
+    <div class="folder"><div class="cover">
+      <small>ДЕЛО № 0711</small>
+      <div class="secret">СЕКРЕТНО</div>
+      <b>Только для агента Ксюши</b>
+    </div></div>
+    <div class="hint">нажми, чтобы открыть</div>
+  </div>
+
+  <div id="scan" class="layer" hidden>
+    <h2>ПОДТВЕРДИТЕ ЛИЧНОСТЬ АГЕНТА</h2>
+    <svg class="fp" id="fp" viewBox="-60 -75 120 150" aria-label="Отпечаток пальца"></svg>
+    <div class="bar"><i id="prog"></i></div>
+    <p id="scanmsg">Приложи палец и держи</p>
+  </div>
+
+  <div id="access" class="layer" hidden></div>
+  <div id="flash"><div class="rays"></div><div class="burst"></div><div class="white"></div></div>
+
+  <div id="dossier" class="layer" hidden>
+    <div class="sheet">
+      <h3>ОПЕРАЦИЯ «<span id="opname">СУББОТА</span>»</h3>
+      <div class="sub">СТРОГО СЕКРЕТНО · ДЛЯ АГЕНТА КСЮШИ</div>
+      <div class="row"><span>День</span><span id="day">суббота</span></div>
+      <div class="row"><span>Этап 1</span><span>спа</span></div>
+      <div class="row"><span>Этап 2</span><span>хинкали</span></div>
+      <div class="row"><span>Участники</span><span>два тайных спецагента</span></div>
+      <div class="row"><span>Статус</span><span id="status">ждёт печати</span></div>
+      <div id="bigstamp">МИССИЯ<br>ПРИНЯТА</div>
+    </div>
+    <button class="btn" id="stampBtn" type="button">Поставить печать</button>
+    <button class="link" id="move" type="button">Суббота не подходит? Запросить перенос</button>
+    <div class="fin" id="fin" hidden></div>
+    <button class="btn ghost" id="again" type="button" hidden>Посмотреть ещё раз</button>
+  </div>
+
+  <button id="mute" aria-label="Звук">♪</button>
+</div>
+
+<script>
+// ---------- sound: everything is synthesized, no files ----------
+let ac, master, music, nbuf, distCurve, muted = false;
+const tracks = new Set();
+const mtof = m => 440 * 2 ** ((m - 69) / 12);
+
+function initAudio() {
+  if (ac) { ac.resume(); return; }
+  try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch { return; }
+  const comp = ac.createDynamicsCompressor();
+  master = ac.createGain(); master.gain.value = muted ? 0 : .8;
+  master.connect(comp).connect(ac.destination);
+  music = ac.createGain(); music.gain.value = .55; music.connect(master);
+  nbuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+  const ch = nbuf.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
+  distCurve = new Float32Array(256).map((_, i) => Math.tanh(3 * (i / 128 - 1)));
+  setInterval(schedule, 25);
+}
+
+function tone(t, hz, dur, {type = 'sine', vol = .2, at = .005, out = music, hzEnd} = {}) {
+  if (!ac) return;
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.setValueAtTime(hz, t);
+  if (hzEnd) o.frequency.exponentialRampToValueAtTime(hzEnd, t + dur * .6);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + at); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  o.connect(g).connect(out); o.start(t); o.stop(t + dur + .05);
+}
+function noise(t, dur, {vol = .3, type = 'highpass', f = 6000, fEnd, q = 1, out = music} = {}) {
+  if (!ac) return;
+  const s = ac.createBufferSource(), fl = ac.createBiquadFilter(), g = ac.createGain();
+  s.buffer = nbuf; fl.type = type; fl.Q.value = q; fl.frequency.setValueAtTime(f, t);
+  if (fEnd) fl.frequency.exponentialRampToValueAtTime(fEnd, t + dur);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  s.connect(fl).connect(g).connect(out); s.start(t); s.stop(t + dur);
+}
+function bass(t, m, dur, out = music, vol = .35) {
+  const o = ac.createOscillator(), ws = ac.createWaveShaper(), lp = ac.createBiquadFilter(), g = ac.createGain();
+  o.type = 'sawtooth'; o.frequency.value = mtof(m); ws.curve = distCurve; lp.type = 'lowpass'; lp.frequency.value = 1100;
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .01); g.gain.setTargetAtTime(.0001, t + dur * .8, .05);
+  o.connect(ws).connect(lp).connect(g).connect(out); o.start(t); o.stop(t + dur + .4);
+}
+const kick = (t, out = music, vol = .9) => tone(t, 150, .35, {vol, out, hzEnd: 40});
+const snare = (t, out) => { noise(t, .18, {vol: .35, type: 'bandpass', f: 1800, q: .7, out}); tone(t, 190, .1, {vol: .2, type: 'triangle', out}); };
+
+// music-box lullaby, C major
+const MEL = [[0,76,4],[4,79,4],[8,84,6],[14,83,2],[16,81,4],[20,79,4],[24,76,8],
+             [32,77,4],[36,81,4],[40,84,4],[44,81,4],[48,79,6],[54,77,2],[56,76,4],[60,74,4]];
+const CH = [[60,64,67],[57,60,64],[53,57,60],[55,59,62]];
+const lullaby = {bpm: 92, len: 64, fn(step, t, out) {
+  const sp = 60 / 92 / 4, s = step % 16, ch = CH[step / 16 | 0];
+  MEL.filter(n => n[0] === step).forEach(([, n, l]) => {
+    tone(t, mtof(n), l * sp + .6, {vol: .16, out});
+    tone(t, mtof(n + 12), l * sp * .6 + .3, {type: 'triangle', vol: .03, out});
+  });
+  if (s === 0) tone(t, mtof(ch[0] - 12), sp * 14, {type: 'triangle', vol: .12, out});
+  if (s % 4 === 2) tone(t, mtof(ch[(s / 4 | 0) % 3]), sp * 3, {type: 'triangle', vol: .05, out});
+}};
+
+// spy groove, E minor
+const RIFF = [[0,40,2],[3,40,1],[4,43,2],[6,40,1],[8,46,2],[10,45,2],[12,43,2],[14,38,2]];
+const LEAD = {0: [71, 2], 2: [70, 2], 4: [71, 6]};
+const spy = {bpm: 120, len: 64, fn(step, t, out) {
+  const sp = 60 / 120 / 4, s = step % 16, bar = step / 16 | 0;
+  RIFF.filter(r => r[0] === s).forEach(([, n, l]) => bass(t, n, l * sp, out));
+  if ([0, 8, 10].includes(s)) kick(t, out);
+  if (s === 4 || s === 12) snare(t, out);
+  if (s % 2 === 0) noise(t, .04, {vol: .08, f: 8000, out});
+  if (bar % 2 === 1 && LEAD[s]) tone(t, mtof(LEAD[s][0]), LEAD[s][1] * sp, {type: 'square', vol: .06, out});
+}};
+
+function play(def, at) {
+  if (!ac) return null;
+  const tr = {...def, step: 0, next: at ?? ac.currentTime + .05, gain: ac.createGain()};
+  tr.gain.connect(music); tracks.add(tr); return tr;
+}
+function stopTrack(tr, fade = .3) {
+  if (!tr || !ac) return;
+  tracks.delete(tr);
+  tr.gain.gain.setTargetAtTime(0, ac.currentTime, fade / 3);
+  setTimeout(() => tr.gain.disconnect(), fade * 1000 + 500);
+}
+function schedule() {
+  for (const tr of tracks) while (tr.next < ac.currentTime + .15) {
+    tr.fn(tr.step % tr.len, tr.next, tr.gain);
+    tr.next += 60 / tr.bpm / 4; tr.step++;
+  }
+}
+function spyIntro(t0) {
+  kick(t0, music, 1.2); bass(t0, 28, .7, music, .5); noise(t0, 1.2, {vol: .25, f: 5000});
+  const t1 = t0 + .75;
+  [0, .125, .25].forEach(d => bass(t1 + d, 40, .1, music, .45));
+  bass(t1 + .375, 28, .7, music, .55); kick(t1 + .375, music, 1.2); noise(t1 + .375, .9, {vol: .2, f: 4000});
+}
+const now = () => ac ? ac.currentTime : 0;
+const sfx = {
+  paper: () => noise(now(), .4, {vol: .15, type: 'bandpass', f: 600, fEnd: 2500, out: master}),
+  pop: () => tone(now(), 900, .12, {vol: .05, out: master, hzEnd: 1400}),
+  whoosh: () => noise(now(), .3, {vol: .07, type: 'bandpass', f: 700, fEnd: 3000, out: master}),
+  ok: () => { tone(now(), 880, .15, {vol: .12, out: master}); tone(now() + .15, 1320, .35, {vol: .12, out: master}); },
+  charge: () => { tone(now(), 400, 1, {type: 'square', vol: .05, out: master, hzEnd: 2400}); tone(now(), 1200, .05, {vol: .1, out: master}); },
+  zap: () => { noise(now(), 1.4, {vol: .4, f: 2000, out: master}); tone(now(), 3000, .6, {vol: .1, out: master, hzEnd: 200}); },
+  stamp: () => { kick(now(), master, 1); noise(now(), .15, {vol: .3, type: 'lowpass', f: 1200, out: master}); },
+  sparkle: () => [84, 88, 91, 96].forEach((m, i) => tone(now() + i * .08, mtof(m), .4, {type: 'triangle', vol: .06, out: master}))
+};
+let scanOsc = null;
+function scanHum(on, dur) {
+  if (!ac) return;
+  if (on) {
+    const g = ac.createGain(); scanOsc = ac.createOscillator(); scanOsc.type = 'triangle';
+    scanOsc.frequency.setValueAtTime(300, now()); scanOsc.frequency.linearRampToValueAtTime(1000, now() + dur);
+    g.gain.value = .06; scanOsc.connect(g).connect(master); scanOsc.start();
+  } else if (scanOsc) { scanOsc.stop(); scanOsc = null; }
+}
+let lulTr = null, spyTr = null;
+const startLullaby = () => { if (!lulTr) lulTr = play(lullaby); };
+const stopAll = (fade) => { stopTrack(lulTr, fade); stopTrack(spyTr, fade); lulTr = spyTr = null; };
+
+const $m = document.getElementById('mute');
+$m.onclick = () => {
+  muted = !muted; $m.classList.toggle('off', muted);
+  if (master) master.gain.setTargetAtTime(muted ? 0 : .8, ac.currentTime, .05);
+};
+
+// ---------- cartoon ----------
+const T = {
+  bunny:    {sp:'bunny',    fur:'#f7ecd9', light:'#fffaf0', dark:'#d8c6a8', inner:'#f3b8bd', nose:'#e39aa2', muz:'#fffdf8'},
+  grey:     {sp:'bunny',    fur:'#b3adb0', light:'#d8d3d5', dark:'#8a8387', inner:'#eab3bb', nose:'#8c6a70', muz:'#eeeaeb'},
+  squirrel: {sp:'squirrel', fur:'#b06a35', light:'#d08b52', dark:'#7f4520', inner:'#e3a585', nose:'#4a2a1a', muz:'#f2dcc0'},
+  cat:      {sp:'cat',      fur:'#d2b48c', light:'#ecd5b2', dark:'#a5835c', inner:'#f2b6ba', nose:'#c9877a', muz:'#fbf3e6', stripe:'#97734a'}
+};
+const F = k => `url(#f-${k})`;
+const rnd = (a, b) => a + Math.random() * (b - a);
+
+const check = (id, base) => `<pattern id="${id}" width="12" height="12" patternUnits="userSpaceOnUse">
+  <rect width="12" height="12" fill="${base}"/><rect width="6" height="12" fill="#fff" opacity=".28"/>
+  <rect width="12" height="6" fill="#fff" opacity=".28"/><rect x="2.5" width="1" height="12" fill="#000" opacity=".08"/></pattern>`;
+const furGrad = k => `<radialGradient id="f-${k}" cx=".4" cy=".35" r=".75">
+  <stop offset="0" stop-color="${T[k].light}"/><stop offset=".6" stop-color="${T[k].fur}"/><stop offset="1" stop-color="${T[k].dark}"/></radialGradient>`;
+
+function outfit(type, p, apron) {
+  const day = type === 'overall' ? `
+    <path d="M-26 -86 Q0 -94 26 -86 L32 -40 L-32 -40Z" fill="url(#${p})"/>
+    <path d="M-20 -62 H20 V-40 H-20Z M-33 -44 H33 L35 -12 H4 L0 -24 L-4 -12 H-35Z" fill="#4f6fa3"/>
+    <path d="M-16 -62 L-20 -86 M16 -62 L20 -86" stroke="#4f6fa3" stroke-width="6"/>
+    <circle cx="-14" cy="-58" r="2.5" fill="#f1d27a"/><circle cx="14" cy="-58" r="2.5" fill="#f1d27a"/>` : `
+    <path d="M-24 -86 Q0 -94 24 -86 L44 -14 Q0 -4 -44 -14Z" fill="url(#${p})"/>
+    <path d="M-24 -86 Q0 -94 24 -86 L44 -14 Q0 -4 -44 -14Z" fill="url(#shade)"/>
+    ${apron ? `<path d="M-18 -66 H18 L25 -18 Q0 -12 -25 -18Z" fill="#fffaf2"/>
+      <path d="M0 -40 C-3 -44 -9 -42 0 -34 C9 -42 3 -44 0 -40Z" fill="#e7798d"/>` : ''}
+    <ellipse cx="-10" cy="-86" rx="12" ry="7" fill="#fff"/><ellipse cx="10" cy="-86" rx="12" ry="7" fill="#fff"/>`;
+  const suit = `
+    <ellipse cx="-15" cy="-6" rx="15" ry="8" fill="#141418"/><ellipse cx="15" cy="-6" rx="15" ry="8" fill="#141418"/>
+    <path d="M-28 -88 Q0 -95 28 -88 L36 -10 H-36Z" fill="#1c1c22"/>
+    <path d="M-11 -89 L0 -58 L11 -89Z" fill="#fff"/>
+    <path d="M-3 -86 H3 L5 -66 L0 -60 L-5 -66Z" fill="#0b0b0e"/>
+    <path d="M-12 -89 L-2 -56 M12 -89 L2 -56" stroke="#33333c" stroke-width="2"/>`;
+  return `<g class="day">${day}</g><g class="agent">${suit}</g>`;
+}
+
+function animal(kind, x, y, s, p, opt = {}) {
+  const c = T[kind], d = (-Math.random() * 3).toFixed(2), f = F(kind);
+  let back = '', ears = '', face = '';
+  if (c.sp === 'bunny') {
+    ears = [-1, 1].map((k, j) => `<g class="ear" style="animation-delay:${d - j * .8}s">
+      <ellipse cx="${k * 19}" cy="-192" rx="13" ry="40" fill="${f}" transform="rotate(${k * 10} ${k * 19} -158)"/>
+      <ellipse cx="${k * 19}" cy="-188" rx="6.5" ry="29" fill="${c.inner}" transform="rotate(${k * 10} ${k * 19} -158)"/></g>`).join('');
+  } else if (c.sp === 'squirrel') {
+    back = `<path d="M24 -30 C70 -20 100 -70 92 -120 C86 -165 40 -175 34 -140 C30 -115 60 -110 62 -90 C64 -60 40 -50 20 -50Z" fill="${f}"/>
+      <path d="M45 -150 C60 -165 85 -150 88 -125 C75 -140 60 -148 45 -150Z" fill="${c.light}" opacity=".7"/>`;
+    ears = [-1, 1].map(k => `<ellipse cx="${k * 32}" cy="-158" rx="11" ry="15" fill="${f}"/><ellipse cx="${k * 32}" cy="-156" rx="5.5" ry="9" fill="${c.inner}"/>
+      <path d="M${k * 30} -172 l${k * 3} -9 l${k * 3} 8" fill="${c.dark}"/>`).join('');
+    face = `<ellipse cx="0" cy="-148" rx="16" ry="9" fill="${c.dark}" opacity=".35"/>`;
+  } else {
+    ears = [-1, 1].map(k => `<path d="M${k * 46} -128 Q${k * 44} -176 ${k * 32} -172 Q${k * 20} -164 ${k * 12} -158Z" fill="${f}"/>
+      <path d="M${k * 38} -138 Q${k * 38} -162 ${k * 31} -162 Q${k * 24} -158 ${k * 20} -154Z" fill="${c.inner}"/>`).join('');
+    face = `<path d="M-10 -160 v13 M0 -162 v15 M10 -160 v13 M-49 -122 h9 M-49 -114 h8 M49 -122 h-9 M49 -114 h-8" stroke="${c.stripe}" stroke-width="3.5" stroke-linecap="round"/>`;
+  }
+  const arms = opt.holding ? '' : [-1, 1].map(k => `
+    <ellipse cx="${k * 37}" cy="-56" rx="10" ry="22" fill="${f}" transform="rotate(${k * -18} ${k * 37} -56)"/>
+    <ellipse class="day" cx="${k * 31}" cy="-76" rx="13" ry="12" fill="url(#${p})"/>
+    <ellipse class="agent" cx="${k * 34}" cy="-66" rx="11" ry="18" fill="#1c1c22" transform="rotate(${k * -18} ${k * 34} -66)"/>`).join('');
+  const glasses = `<g class="agent glasses"><path d="M-36 -125 H-6 Q-6 -108 -21 -108 Q-36 -108 -36 -125Z M6 -125 H36 Q36 -108 21 -108 Q6 -108 6 -125Z" fill="#0b0b0e"/>
+    <path d="M-8 -123 H8 M-36 -124 L-48 -128 M36 -124 L48 -128" stroke="#0b0b0e" stroke-width="3"/>
+    <path d="M-31 -121 l7 0 M11 -121 l7 0" stroke="#fff" stroke-width="2" opacity=".7"/></g>`;
+  const head = `<g class="head" style="animation-delay:${d}s">${ears}
+    <ellipse cx="0" cy="-120" rx="50" ry="44" fill="${f}"/>${face}
+    <ellipse cx="-9" cy="-103" rx="12" ry="9" fill="${c.muz}"/><ellipse cx="9" cy="-103" rx="12" ry="9" fill="${c.muz}"/>
+    <ellipse cx="0" cy="-95" rx="8" ry="6" fill="${c.muz}"/>
+    <circle cx="-12" cy="-102" r=".9" fill="#8a6a5a"/><circle cx="-7" cy="-100" r=".9" fill="#8a6a5a"/>
+    <circle cx="12" cy="-102" r=".9" fill="#8a6a5a"/><circle cx="7" cy="-100" r=".9" fill="#8a6a5a"/>
+    <ellipse cx="-33" cy="-103" rx="8" ry="4.5" fill="#f4a0a0" opacity=".45"/><ellipse cx="33" cy="-103" rx="8" ry="4.5" fill="#f4a0a0" opacity=".45"/>
+    ${[-20, 20].map(ex => `<g class="eye" style="animation-delay:${d}s"><ellipse cx="${ex}" cy="-117" rx="4.2" ry="4.8" fill="#1e1410"/><circle cx="${ex + 1.4}" cy="-119" r="1.3" fill="#fff"/></g>`).join('')}
+    <path d="M-5 -110 Q0 -114 5 -110 Q0 -104 -5 -110Z" fill="${c.nose}"/>
+    <path d="M0 -106 V-101" stroke="#7a5446" stroke-width="1.2"/>${glasses}</g>`;
+  const body = `${back}
+    <ellipse cx="-15" cy="-6" rx="14" ry="8" fill="${f}"/><ellipse cx="15" cy="-6" rx="14" ry="8" fill="${f}"/>
+    ${outfit(opt.outfit, p, opt.apron)}${arms}
+    <ellipse cx="0" cy="-82" rx="28" ry="6" fill="#000" opacity=".12"/>${head}`;
+  // the memory zapper: big silver stick held out toward the viewer, with a red button and a light at the tip
+  const zapper = `<g id="zap" opacity="0"><g transform="translate(80 -30) rotate(10)">
+      <rect x="-12" y="-135" width="24" height="140" rx="9" fill="url(#metal)" stroke="#6d7684" stroke-width="2"/>
+      <rect x="-15" y="-150" width="30" height="20" rx="6" fill="#8e98a6" stroke="#5d6573" stroke-width="2"/>
+      <rect x="-12" y="-20" width="24" height="5" fill="#2a2a30"/><rect x="-12" y="-10" width="24" height="5" fill="#2a2a30"/>
+      <circle id="zbtn" cx="0" cy="-70" r="7" fill="#e2484f" stroke="#8d1f25" stroke-width="2"/>
+      <circle id="ztip" cx="0" cy="-152" r="10" fill="#fff" opacity="0"/>
+      <g filter="url(#fuzz)"><ellipse cx="0" cy="-5" rx="17" ry="19" fill="${f}"/></g>
+    </g></g>`;
+  const paws = opt.holding ? `<g id="paws" filter="url(#fuzz)">${[-1, 1].map(k => `<ellipse cx="${k * 104}" cy="-45" rx="11" ry="13" fill="${f}"/>`).join('')}</g>${zapper}` : '';
+  const inner = `<g class="bob" style="animation-delay:${d}s"><g filter="url(#fuzz)">${body}</g>${opt.extra || ''}${paws}</g>`;
+  return `<g transform="translate(${x} ${y}) scale(${opt.flip ? -s : s} ${s})">
+    <ellipse cx="0" cy="0" rx="44" ry="9" fill="#000" opacity=".18"/>
+    ${opt.id ? '<g id="pile"></g>' : ''}<g ${opt.id ? `id="${opt.id}"` : 'class="fan"'}>${inner}</g></g>`;
+}
+
+const card = `<g id="card"><rect x="-101" y="-83" width="210" height="100" rx="8" fill="#000" opacity=".15"/>
+  <rect x="-105" y="-88" width="210" height="100" rx="8" fill="#fffdf6" stroke="#e6d9bf" stroke-width="2"/>
+  <text class="cardtext" id="ct" x="0" y="-26" font-size="34"></text></g>`;
+
+const flowers = Array.from({length: 45}, () =>
+  `<circle cx="${rnd(0, 540)}" cy="${rnd(660, 960)}" r="${rnd(2, 4)}" fill="${['#fff', '#ffe27a', '#f7b6c8'][Math.floor(rnd(0, 3))]}"/>`).join('');
+const stars = Array.from({length: 60}, () => `<circle cx="${rnd(0, 540)}" cy="${rnd(0, 420)}" r="${rnd(.6, 2)}" fill="#fff" opacity="${rnd(.4, 1)}"/>`).join('');
+const city = Array.from({length: 14}, (_, i) => {
+  const w = rnd(30, 50), h = rnd(80, 220), x = i * 40 - 10;
+  const win = Array.from({length: 6}, () => `<rect x="${x + rnd(6, w - 10)}" y="${560 - rnd(10, h - 10)}" width="5" height="7" fill="#ffd77a" opacity=".8"/>`).join('');
+  return `<rect x="${x}" y="${560 - h}" width="${w}" height="${h}" fill="#151a33"/>${win}`;
+}).join('');
+
+document.getElementById('s').innerHTML = `
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9dbf5"/><stop offset="1" stop-color="#eaf6fb"/></linearGradient>
+  <linearGradient id="night" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#070b1d"/><stop offset="1" stop-color="#25294d"/></linearGradient>
+  <linearGradient id="metal" x1="0" x2="1"><stop offset="0" stop-color="#9aa4b2"/><stop offset=".45" stop-color="#f4f7fb"/><stop offset="1" stop-color="#a8b1bd"/></linearGradient>
+  <radialGradient id="spot" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  <linearGradient id="shade" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".18"/><stop offset=".3" stop-color="#000" stop-opacity="0"/>
+    <stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></linearGradient>
+  <filter id="fuzz" x="-15%" y="-15%" width="130%" height="130%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="3" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="3" result="d"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  .6 0 0 0 -.26" result="speck"/>
+    <feComposite in="speck" in2="d" operator="in" result="s2"/>
+    <feMerge><feMergeNode in="d"/><feMergeNode in="s2"/></feMerge>
+  </filter>
+  ${Object.keys(T).map(furGrad).join('')}
+  ${check('pRed', '#d9534f')}${check('pBlue', '#5b8fc9')}${check('pGreen', '#6fae6a')}${check('pPink', '#ee9fb3')}${check('pYellow', '#e2b450')}
+</defs>
+<g class="day">
+  <rect width="540" height="960" fill="url(#sky)"/>
+  <ellipse cx="420" cy="140" rx="60" ry="20" fill="#fff" opacity=".8"/><ellipse cx="120" cy="210" rx="50" ry="16" fill="#fff" opacity=".7"/>
+  <path d="M0 520 Q120 380 260 470 T540 430 V960 H0Z" fill="#7fb36a"/>
+  <path d="M0 600 Q160 500 300 580 T540 560 V960 H0Z" fill="#9cc97a"/>
+  <ellipse cx="38" cy="520" rx="36" ry="150" fill="#3f7a3c"/><ellipse cx="505" cy="530" rx="34" ry="140" fill="#3f7a3c"/>
+  <path d="M0 660 Q270 615 540 660 V960 H0Z" fill="#b2d977"/>${flowers}
+</g>
+<g class="agent">
+  <rect width="540" height="960" fill="url(#night)"/>${stars}
+  <circle cx="430" cy="120" r="34" fill="#f5f0d8"/><circle cx="444" cy="112" r="30" fill="#0b1024"/>
+  ${city}
+  <rect y="560" width="540" height="400" fill="#1b2230"/>
+  <path d="M0 660 Q270 625 540 660 V960 H0Z" fill="#232b3c"/>
+  <ellipse cx="270" cy="820" rx="260" ry="140" fill="url(#spot)"/>
+</g>
+${animal('cat', 135, 705, .8, 'pYellow')}
+${animal('squirrel', 410, 705, .8, 'pGreen', {outfit: 'overall'})}
+${animal('squirrel', 75, 870, 1, 'pBlue', {flip: true, outfit: 'overall'})}
+${animal('grey', 465, 870, 1, 'pPink')}
+${animal('bunny', 270, 890, 1.55, 'pRed', {holding: true, apron: true, id: 'hop', extra: card})}
+<g id="hearts"></g>`;
+
+document.getElementById('fp').innerHTML = `<g fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round">
+  ${[8, 15, 22, 29, 36, 43, 50].map((r, i) => `<path d="M${-r} ${r * .5} V0 A${r} ${r * 1.15} 0 0 1 ${r} 0 V${r * .9 - i * 3}" stroke-dasharray="${36 + i * 9} 7"/>`).join('')}
+  <path d="M0 -4 V16"/></g>
+  <rect class="scanline" x="-60" y="-75" width="120" height="4" fill="#b6ffd3"/>`;
+
+const $ = id => document.getElementById(id);
+const svg = $('s'), cardEl = $('card'), hop = $('hop'), ct = $('ct'), pile = $('pile'), hearts = $('hearts');
+cardEl.style.opacity = 0;
+const zap = $('zap'), ztip = $('ztip'), zbtn = $('zbtn'), paws = $('paws');
+const fans = [...document.querySelectorAll('.fan')], glasses = [...document.querySelectorAll('.glasses')];
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const jump = (el, h, delay = 0) => el.animate([{transform: 'translateY(0)'}, {transform: `translateY(-${h}px)`}, {transform: 'translateY(0)'}],
+  {duration: 380, delay, easing: 'ease-out'});
+const fade = (el, from, to, duration) => el.animate([{opacity: from}, {opacity: to}], {duration, fill: 'forwards'}).finished;
+fans.forEach(f => f.addEventListener('click', () => { jump(f, 22); sfx.pop(); }));
+
+function setText(str) {
+  const lines = str.split('\n');
+  let size = [34, 30, 24][Math.min(lines.length, 3) - 1];
+  const render = () => {
+    ct.setAttribute('font-size', size.toFixed(1));
+    ct.innerHTML = lines.map((l, i) => `<tspan x="0" dy="${i ? 1.15 : 0}em">${l}</tspan>`).join('');
+    ct.setAttribute('y', (-38 + size * .35 - (lines.length - 1) * size * 1.15 / 2).toFixed(1));
+  };
+  render();
+  // shrink to fit the real rendered width (emoji are wider than letters)
+  const w = Math.max(...[...ct.querySelectorAll('tspan')].map(t => t.getComputedTextLength()));
+  if (w > 180) { size *= 180 / w; render(); }
+}
+
+async function show(text, {hold = 1500, toss = true, onShow} = {}) {
+  // keep the card hidden while its text is swapped, otherwise the old/empty card flashes for a frame
+  cardEl.style.opacity = 0;
+  cardEl.getAnimations().forEach(a => a.cancel());
+  setText(text);
+  jump(hop, 12);
+  fans.forEach((f, j) => jump(f, 8, 150 + j * 80));
+  sfx.pop();
+  await cardEl.animate([{transform: 'translateY(40px) scale(.85)', opacity: 0}, {transform: 'none', opacity: 1}],
+    {duration: 350, easing: 'cubic-bezier(.2,1.4,.4,1)', fill: 'forwards'}).finished;
+  onShow && onShow();
+  await wait(hold);
+  if (!toss) return;
+  // fallen cards land low and off to the sides, behind the bunny, so they never cover the next card
+  const dir = Math.random() < .5 ? -1 : 1, t = `translate(${dir * rnd(95, 125)}px,${rnd(74, 82)}px) rotate(${dir * rnd(10, 35)}deg) scale(.5)`;
+  sfx.whoosh();
+  await cardEl.animate([{transform: 'none'}, {transform: `translate(${dir * 60}px,-40px) rotate(${dir * 20}deg) scale(.8)`, offset: .35}, {transform: t}],
+    {duration: 550, easing: 'ease-in', fill: 'forwards'}).finished;
+  const clone = cardEl.cloneNode(true);
+  clone.removeAttribute('id'); clone.querySelector('text').removeAttribute('id');
+  clone.style.cssText = `transform-box:fill-box;transform-origin:center;transform:${t}`;
+  pile.appendChild(clone);
+  if (pile.children.length > 6) pile.firstChild.remove();
+  cardEl.getAnimations().forEach(a => a.cancel());
+  cardEl.style.opacity = 0;
+}
+
+function burstHearts() {
+  sfx.sparkle();
+  for (let i = 0; i < 12; i++) {
+    const h = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    h.setAttribute('d', 'M0 0 C-6 -8 -16 -2 0 10 C16 -2 6 -8 0 0Z');
+    h.setAttribute('fill', ['#f27a93', '#f6a5b6', '#e85d78'][i % 3]);
+    hearts.appendChild(h);
+    const x = rnd(140, 400), y = rnd(700, 780), sc = rnd(1.2, 2.2);
+    h.animate([{transform: `translate(${x}px,${y}px) scale(${sc})`, opacity: 0},
+               {transform: `translate(${x + rnd(-20, 20)}px,${y - 60}px) scale(${sc})`, opacity: 1, offset: .2},
+               {transform: `translate(${x + rnd(-40, 40)}px,${y - rnd(250, 400)}px) scale(${sc})`, opacity: 0}],
+      {duration: rnd(1800, 2600), delay: i * 120, easing: 'ease-out', fill: 'forwards'}).finished.then(() => h.remove());
+  }
+}
+
+function setMode(mib) {
+  svg.classList.toggle('mib', mib);
+  pile.innerHTML = '';
+  glasses.forEach(g => g.getAnimations().forEach(a => a.cancel()));
+  [zap, ztip, zbtn, paws].forEach(el => el.getAnimations().forEach(a => a.cancel()));
+}
+
+async function typeOut(el, text) {
+  el.textContent = '';
+  for (const ch of text) { el.textContent += ch; await wait(60); }
+}
+
+async function cartoon() {
+  setMode(false);
+  stopAll(.3);
+  startLullaby();
+  await show('Ксюша, привет!');
+  await show('Мы обычные\nзверята');
+  await show('Ничего\nподозрительного');
+  await show('Хотя…', {hold: 1800, onShow: () => fans[2].animate(
+    [{transform: 'scale(1)'}, {transform: 'scale(1.3)', offset: .25}, {transform: 'scale(1.3)', offset: .8}, {transform: 'scale(1)'}], {duration: 1800, easing: 'ease-out'})});
+
+  // hard cut to the agents: lullaby stops, "тун-тудудудум", then the groove
+  const acc = $('access');
+  acc.hidden = false;
+  fade(acc, 0, 1, 120);
+  stopTrack(lulTr, .1); lulTr = null;
+  if (ac) { const t0 = ac.currentTime + .05; spyIntro(t0); spyTr = play(spy, t0 + 1.75); }
+  await wait(150);
+  setMode(true);
+  await typeOut(acc, 'ДОСТУП РАЗРЕШЁН');
+  await wait(600);
+  // glasses start above the heads (opacity 0 by default) and drop on one by one
+  glasses.forEach((g, i) => g.animate([{transform: 'translateY(-90px)', opacity: 0}, {transform: 'translateY(-90px)', opacity: 1, offset: .15}, {transform: 'none', opacity: 1}],
+    {duration: 600, delay: 450 + i * 180, easing: 'cubic-bezier(.4,1.6,.6,1)', fill: 'both'}));
+  await fade(acc, 1, 0, 400);
+  acc.hidden = true;
+  await wait(1500);
+
+  await show('Это секретная\nоперация 🕶');
+  await show('Кодовое название:\n«Суббота»');
+  await show('Этап 1:\nспа 🧖‍♀️');
+  await show('Этап 2:\nхинкали 🥟');
+  await show('Много хинкали', {hold: 1000});
+  await show('Ещё больше\nхинкали 🥟🥟🥟', {hold: 1300});
+  await show('Участники:\nдва тайных\nспецагента 🕶', {hold: 1800});
+  await show('Мы бы тоже пошли,\nно нет допуска 😔', {hold: 1900});
+  await show('Отказ\nне предусмотрен 😌', {hold: 1800});
+  await show('Посмотри сюда 👀', {hold: 900});
+
+  // the zapper comes up, gets pushed toward the camera, button press, light, flash
+  fade(paws, 1, 0, 200);
+  await zap.animate([{opacity: 0, transform: 'translateY(80px)'}, {opacity: 1, transform: 'none'}],
+    {duration: 500, easing: 'cubic-bezier(.3,1.4,.5,1)', fill: 'forwards'}).finished;
+  await wait(500);
+  await zap.animate([{transform: 'none', opacity: 1}, {transform: 'translate(-10px,-25px) scale(1.3)', opacity: 1}],
+    {duration: 500, easing: 'ease-out', fill: 'forwards'}).finished;
+  await wait(400);
+  sfx.charge();
+  zbtn.animate([{fill: '#e2484f'}, {fill: '#ffb3b8'}, {fill: '#e2484f'}], {duration: 250, iterations: 2});
+  await ztip.animate([{opacity: 0, transform: 'scale(.5)'}, {opacity: 1, transform: 'scale(3)'}], {duration: 900, easing: 'ease-in', fill: 'forwards'}).finished;
+
+  // flash: rays and a glow burst out of the zapper tip, screen goes white, then the meadow comes back out of a blur
+  const flash = $('flash'), [rays, burst, white] = flash.children;
+  const sr = $('stage').getBoundingClientRect(), tr = ztip.getBoundingClientRect();
+  flash.style.setProperty('--fx', tr.left + tr.width / 2 - sr.left + 'px');
+  flash.style.setProperty('--fy', tr.top + tr.height / 2 - sr.top + 'px');
+  sfx.zap();
+  stopTrack(spyTr, .05); spyTr = null;
+  rays.animate([{transform: 'scale(0) rotate(0deg)'}, {transform: 'scale(3.5) rotate(70deg)'}], {duration: 750, easing: 'ease-out', fill: 'forwards'});
+  burst.animate([{transform: 'scale(0)'}, {transform: 'scale(7)'}], {duration: 650, easing: 'ease-in', fill: 'forwards'});
+  await wait(450);
+  await fade(white, 0, 1, 200);
+  setMode(false);
+  [rays, burst].forEach(e => e.getAnimations().forEach(a => a.cancel()));
+  await wait(800);
+  startLullaby();
+  svg.animate([{filter: 'blur(14px) brightness(1.6)'}, {filter: 'blur(0) brightness(1)'}], {duration: 2000, easing: 'ease-out'});
+  await fade(white, 1, 0, 1600);
+
+  await show('Ты ничего\nне видела');
+  await show('Но в субботу\nты занята ❤️', {toss: false, hold: 3200, onShow: burstHearts});
+  await fade(cardEl, 1, 0, 300);
+  openDossier();
+}
+
+function openDossier() {
+  const d = $('dossier');
+  $('bigstamp').getAnimations().forEach(a => a.cancel());
+  $('status').textContent = 'ждёт печати';
+  $('stampBtn').hidden = false; $('again').hidden = true; $('fin').hidden = true; $('move').hidden = false;
+  moved = false;
+  d.classList.remove('moved');
+  $('opname').textContent = 'СУББОТА'; $('day').textContent = 'суббота';
+  d.hidden = false;
+  d.animate([{opacity: 0}, {opacity: 1}], {duration: 600});
+}
+let moved = false;
+$('move').addEventListener('click', () => {
+  initAudio();
+  moved = true;
+  $('move').hidden = true;
+  $('dossier').classList.add('moved');
+  $('opname').innerHTML = '<s>СУББОТА</s><em>воскресенье</em>';
+  $('day').innerHTML = '<s>суббота</s><em>воскресенье</em>';
+  sfx.paper();
+  document.querySelectorAll('.moved em').forEach(e => e.animate([{opacity: 0, transform: 'translateY(-6px)'}, {opacity: 1, transform: 'none'}], {duration: 500}));
+});
+$('stampBtn').addEventListener('click', () => {
+  initAudio();
+  $('stampBtn').hidden = true; $('move').hidden = true;
+  $('fin').textContent = `До встречи в ${moved ? 'воскресенье' : 'субботу'}, агент 🕶`;
+  $('bigstamp').animate([{transform: 'rotate(-10deg) scale(3)', opacity: 0}, {transform: 'rotate(-10deg) scale(1)', opacity: .92}],
+    {duration: 300, easing: 'cubic-bezier(.5,0,.8,.4)', fill: 'forwards'});
+  setTimeout(() => {
+    sfx.stamp(); navigator.vibrate?.(60);
+    document.querySelector('.sheet').animate([{transform: 'rotate(-1.5deg) translateY(0)'}, {transform: 'rotate(-1.5deg) translateY(5px)'},
+      {transform: 'rotate(-1.5deg) translateY(0)'}], {duration: 220});
+    $('status').textContent = 'принята';
+  }, 300);
+  setTimeout(() => { sfx.sparkle(); $('fin').hidden = false; $('again').hidden = false; }, 900);
+});
+$('again').onclick = () => { $('dossier').hidden = true; cartoon(); };
+
+// ---------- folder → scan → cartoon ----------
+const folder = $('folder');
+function openFolder() {
+  if (folder.classList.contains('open')) return;
+  initAudio();
+  sfx.paper();
+  folder.classList.add('open');
+  setTimeout(() => { folder.hidden = true; $('scan').hidden = false; }, 1300);
+}
+folder.addEventListener('click', openFolder);
+folder.addEventListener('keydown', e => (e.key === 'Enter' || e.key === ' ') && openFolder());
+
+const scan = $('scan'), prog = $('prog'), msg = $('scanmsg'), HOLD = 1800;
+let start = 0, raf = 0, done = false;
+function tick(t) {
+  const p = Math.min(1, (t - start) / HOLD);
+  prog.style.width = p * 100 + '%';
+  msg.textContent = `Сканирование… ${Math.round(p * 100)}%`;
+  if (p < 1) { raf = requestAnimationFrame(tick); return; }
+  done = true;
+  scanHum(false);
+  sfx.ok();
+  scan.classList.remove('holding'); scan.classList.add('ok');
+  msg.textContent = 'Личность подтверждена: агент Ксюша';
+  navigator.vibrate?.([40, 60, 40]);
+  setTimeout(async () => {
+    await fade(scan, 1, 0, 500);
+    scan.hidden = true;
+    cartoon();
+  }, 1400);
+}
+scan.addEventListener('pointerdown', e => {
+  if (done) return;
+  e.preventDefault();
+  initAudio();
+  scan.classList.add('holding');
+  scanHum(true, HOLD / 1000);
+  navigator.vibrate?.(20);
+  start = performance.now();
+  raf = requestAnimationFrame(tick);
+});
+const release = () => {
+  if (done || !scan.classList.contains('holding')) return;
+  cancelAnimationFrame(raf);
+  scanHum(false);
+  scan.classList.remove('holding');
+  prog.style.width = '0';
+  msg.textContent = 'Сканирование прервано. Держи палец, пока не дойдёт до 100%';
+};
+['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => scan.addEventListener(ev, release));
+scan.addEventListener('contextmenu', e => e.preventDefault());
+</script>
+
+</html>
