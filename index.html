@@ -499,7 +499,14 @@ async function typeOut(el, text) {
   for (const ch of text) { el.textContent += ch; await wait(60); }
 }
 
+// start downloading the fonts right away; the cartoon waits for them (max 3 s) so the first card doesn't swap fonts mid-view
+const fontsReady = Promise.race([
+  Promise.all(['34px Neucha', '16px "PT Mono"', '16px "Rubik Mono One"'].map(f => document.fonts?.load(f, 'Ксюша АБВ'))).catch(() => {}),
+  wait(3000)
+]);
+
 async function cartoon() {
+  await fontsReady;
   setMode(false);
   stopAll(.3);
   startLullaby();
